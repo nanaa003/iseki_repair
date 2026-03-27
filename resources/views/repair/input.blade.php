@@ -171,7 +171,7 @@
                             <label class="form-label fw-bold small text-muted text-uppercase">
                                 <i class="bi bi-image me-1"></i>Pilih Foto
                             </label>
-                            <input type="file" id="imageInput" class="form-control" accept="image/*" style="border-radius: 12px;">
+                            <input type="file" id="imageInput" class="form-control" accept="image/*" capture="environment" style="border-radius: 12px;">
                         </div>
 
                         <div style="max-height: 400px; overflow: hidden; display: none;" id="cropperContainer" class="rounded-3 shadow-sm mb-3 text-center bg-light p-2 border">
