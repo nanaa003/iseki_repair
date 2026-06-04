@@ -14,6 +14,7 @@ Route::post('/repair/verify-nik', [RepairController::class, 'verifyNik'])->name(
 
 Route::get('/finish/{id}', [RepairController::class, 'finishForm'])->name('repair.finishForm');
 Route::post('/finish/{id}', [RepairController::class, 'updateFinish'])->name('repair.updateFinish');
+Route::put('/repair/{id}', [RepairController::class, 'update'])->name('repair.update');
 Route::delete('/repair/{id}', [RepairController::class, 'destroy'])->name('repair.destroy');
 
 // Admin Auth

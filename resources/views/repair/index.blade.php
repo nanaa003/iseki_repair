@@ -7,6 +7,13 @@
 </div>
 
 <div class="container pb-5 fade-in">
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+    
     <!-- Stats Row -->
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
@@ -110,10 +117,14 @@
                                 @endif
                             </td>
                             <td class="text-center text-nowrap">
-                                <a href="{{ route('repair.finishForm', $p->Id_Perbaikan) }}" class="btn btn-sm btn-success px-3 me-1">
+                                <a href="{{ route('repair.finishForm', $p->Id_Perbaikan) }}" class="btn btn-sm btn-success px-3 me-1 mb-1">
                                     <i class="bi bi-check2-circle me-1"></i>Selesaikan
                                 </a>
-                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="hapusData({{ $p->Id_Perbaikan }}, this)" title="Hapus data ini" style="border-radius: 8px;">
+                                <button type="button" class="btn btn-sm btn-outline-primary mb-1 me-1" style="border-radius: 8px;"
+                                    data-bs-toggle="modal" data-bs-target="#editRepairModal{{ $p->Id_Perbaikan }}" title="Edit Keterangan">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger mb-1" onclick="hapusData({{ $p->Id_Perbaikan }}, this)" title="Hapus data ini" style="border-radius: 8px;">
                                     <i class="bi bi-x-lg"></i>
                                 </button>
                             </td>
@@ -266,6 +277,57 @@
     </div>
 </div>
 
+@foreach($ongoing as $p)
+<!-- Edit Repair Modal -->
+<div class="modal fade" id="editRepairModal{{ $p->Id_Perbaikan }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="{{ route('repair.update', $p->Id_Perbaikan) }}" method="POST" class="modal-content" style="border-radius: 16px; border: none; overflow: hidden;">
+            @csrf
+            @method('PUT')
+            <div class="modal-header border-0" style="background: linear-gradient(135deg, var(--pink-500), var(--pink-700)); color: white;">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-pencil-square me-2"></i>Edit Permasalahan
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" style="background: #fdf4ff;">
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-muted small">Traktor</label>
+                    <input type="text" class="form-control" value="{{ $p->No_Instruksi }} / {{ $p->Type_Traktor }}" readonly style="border-radius: 10px; background: #e9ecef;">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-muted small">Kategori Permasalahan</label>
+                    <select name="Kategori_Perbaikan" class="form-select" required style="border-radius: 10px;">
+                        @php
+                        $kategoriList = [
+                            'Lecet', 'Part Kurang Dst', 'Part Kurang Painting', 'Part Kurang Assembling',
+                            'Part NG (di NG kan oleh Produksi)', 'NG Part (NG Dari Supplier)',
+                            'Pengencangan', 'Penyetelan', 'Perakitan', 'Susah/Sulit Rakit', 'Checksheet', 'Lain-lain'
+                        ];
+                        // If it's a custom 'Lain-lain: xxx', we select 'Lain-lain' or keep it as custom
+                        $isCustom = !in_array($p->Kategori_Perbaikan, $kategoriList);
+                        @endphp
+                        @foreach($kategoriList as $kat)
+                        <option value="{{ $kat }}" {{ ($p->Kategori_Perbaikan == $kat) || ($kat == 'Lain-lain' && $isCustom) ? 'selected' : '' }}>
+                            {{ $kat }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-muted small">Keterangan / Detail</label>
+                    <textarea class="form-control" name="Ket_Perbaikan" required style="border-radius: 10px; height: 100px;">{{ $p->Ket_Perbaikan }}</textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-0" style="background: #fdf4ff;">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 10px;">Batal</button>
+                <button type="submit" class="btn btn-pink" style="border-radius: 10px;">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endforeach
+
 @push('scripts')
 <script>
     function hapusData(id, btn) {
@@ -274,7 +336,7 @@
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
-        fetch('/iseki_fix/public/repair/' + id, {
+        fetch('{{ url("repair") }}/' + id, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',

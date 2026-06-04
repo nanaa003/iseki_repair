@@ -237,6 +237,23 @@ class RepairController extends Controller
         return response()->json(['success' => true, 'message' => 'Repair finished successfully.']);
     }
 
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'Kategori_Perbaikan' => 'required',
+            'Ket_Perbaikan'      => 'required',
+        ]);
+
+        $perbaikan = Perbaikan::findOrFail($id);
+        
+        $perbaikan->update([
+            'Kategori_Perbaikan' => $request->Kategori_Perbaikan,
+            'Ket_Perbaikan'      => $request->Ket_Perbaikan,
+        ]);
+
+        return redirect()->back()->with('success', 'Data perbaikan berhasil diperbarui.');
+    }
+
     public function destroy($id)
     {
         $perbaikan = Perbaikan::findOrFail($id);
