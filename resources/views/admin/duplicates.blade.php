@@ -24,6 +24,11 @@
                         <i class="bi bi-copy me-1"></i>Cek Duplikasi
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('admin.users.index') }}">
+                        <i class="bi bi-people me-1"></i>Manajemen User
+                    </a>
+                </li>
                 <li class="nav-item ms-2">
                     <form action="{{ route('logout') }}" method="POST" class="d-inline">
                         @csrf

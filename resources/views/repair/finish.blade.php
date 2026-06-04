@@ -47,7 +47,51 @@
                 <i class="bi bi-person-badge me-2"></i>Scan Barcode NIK Anggota (PIC)
             </div>
             <div class="card-body text-center p-4">
-                <div id="reader-pic" style="width: 100%; max-width: 400px; margin: 0 auto;" class="mb-4 rounded-3 overflow-hidden shadow-sm"></div>
+                
+                <!-- Nav tabs for Scan / Manual -->
+                <ul class="nav nav-pills nav-fill mb-4" id="scanNikTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="camera-nik-tab" data-bs-toggle="tab" data-bs-target="#camera-nik" type="button" role="tab">
+                            <i class="bi bi-camera me-1"></i>Scan Kamera
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="manual-nik-tab" data-bs-toggle="tab" data-bs-target="#manual-nik" type="button" role="tab">
+                            <i class="bi bi-keyboard me-1"></i>Scanner / Ketik Manual
+                        </button>
+                    </li>
+                </ul>
+
+                <style>
+                    /* Custom style for active nav pills in finish page */
+                    #scanNikTab .nav-link {
+                        color: #059669;
+                    }
+                    #scanNikTab .nav-link.active {
+                        background-color: #059669 !important;
+                        color: white !important;
+                    }
+                </style>
+
+                <div class="tab-content" id="scanNikTabContent">
+                    {{-- Camera Scan Tab --}}
+                    <div class="tab-pane fade show active" id="camera-nik" role="tabpanel">
+                        <div id="reader-pic" style="width: 100%; max-width: 400px; margin: 0 auto;" class="mb-4 rounded-3 overflow-hidden shadow-sm"></div>
+                    </div>
+
+                    {{-- Manual / Scanner Tab --}}
+                    <div class="tab-pane fade" id="manual-nik" role="tabpanel">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="manual_nik_input" placeholder="Scan Barcode / Ketik Manual..." style="border-radius: 12px; border-color: #059669;" autofocus>
+                            <label for="manual_nik_input"><i class="bi bi-upc-scan me-1"></i>Input NIK Barcode</label>
+                        </div>
+                        <button type="button" class="btn w-100 btn-lg text-white" id="btnProsesManualNik" style="background-color: #059669; border-radius: 12px;">
+                            <i class="bi bi-search me-1"></i>Proses NIK
+                        </button>
+                    </div>
+                </div>
+
+                <hr class="my-4">
 
                 <div class="row text-start justify-content-center">
                     <div class="col-12 col-md-6 mb-3">
@@ -113,8 +157,10 @@
             rememberLastUsedCamera: true,
         }, false);
 
-        function onScanSuccess(decodedText) {
-            html5QrcodeScannerPIC.clear();
+        function processBarcodeNIK(decodedText) {
+            try {
+                html5QrcodeScannerPIC.clear();
+            } catch (e) {}
 
             Id_Member.value = decodedText;
             Nama_Member.value = "Mencari data...";
@@ -158,6 +204,24 @@
                     document.getElementById('btnRescan').classList.remove('d-none');
                 });
         }
+
+        function onScanSuccess(decodedText) {
+            processBarcodeNIK(decodedText);
+        }
+
+        document.getElementById('btnProsesManualNik').addEventListener('click', function() {
+            const val = document.getElementById('manual_nik_input').value.trim();
+            if(val) {
+                processBarcodeNIK(val);
+            }
+        });
+
+        document.getElementById('manual_nik_input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('btnProsesManualNik').click();
+            }
+        });
 
         html5QrcodeScannerPIC.render(onScanSuccess);
 

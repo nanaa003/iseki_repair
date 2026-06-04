@@ -21,6 +21,8 @@ Route::get('/login', [AdminController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AdminController::class, 'login']);
 Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
 
+use App\Http\Controllers\UserController;
+
 // Admin Dashboard (Protected)
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
@@ -28,4 +30,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/duplicates', [AdminController::class, 'duplicates'])->name('duplicates');
     Route::post('/duplicates/exclude', [AdminController::class, 'excludeDuplicate'])->name('duplicates.exclude');
     Route::post('/duplicates/include', [AdminController::class, 'includeDuplicate'])->name('duplicates.include');
+
+    // Users
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 });

@@ -42,7 +42,43 @@
                 <i class="bi bi-1-circle-fill me-2"></i>Step 1: Scan Traktor
             </div>
             <div class="card-body text-center p-4">
-                <div id="reader-tractor" style="width: 100%; max-width: 400px; margin: 0 auto;" class="mb-3 rounded-3 overflow-hidden shadow-sm"></div>
+                
+                <!-- Nav tabs for Scan / Manual -->
+                <ul class="nav nav-pills nav-fill nav-pills-pink mb-4" id="scanTractorTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="camera-scan-tab" data-bs-toggle="tab" data-bs-target="#camera-scan" type="button" role="tab">
+                            <i class="bi bi-camera me-1"></i>Scan Kamera
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="manual-scan-tab" data-bs-toggle="tab" data-bs-target="#manual-scan" type="button" role="tab">
+                            <i class="bi bi-keyboard me-1"></i>Scanner / Ketik Manual
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="scanTractorTabContent">
+                    {{-- Camera Scan Tab --}}
+                    <div class="tab-pane fade show active" id="camera-scan" role="tabpanel">
+                        <div id="reader-tractor" style="width: 100%; max-width: 400px; margin: 0 auto;" class="mb-3 rounded-3 overflow-hidden shadow-sm"></div>
+                        <button type="button" class="btn btn-outline-danger btn-lg w-100 mt-2 d-none" id="btnRescanTractor" style="border-radius: 12px;">
+                            <i class="bi bi-arrow-repeat me-2"></i>Pindai Ulang Barcode Traktor
+                        </button>
+                    </div>
+
+                    {{-- Manual / Scanner Tab --}}
+                    <div class="tab-pane fade" id="manual-scan" role="tabpanel">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="manual_scan_input" placeholder="Scan Barcode / Ketik Manual..." style="border-radius: 12px; border-color: var(--pink-300);" autofocus>
+                            <label for="manual_scan_input"><i class="bi bi-upc-scan me-1"></i>Input Barcode</label>
+                        </div>
+                        <button type="button" class="btn btn-pink w-100 btn-lg" id="btnProsesManualScan">
+                            <i class="bi bi-search me-1"></i>Proses Barcode
+                        </button>
+                    </div>
+                </div>
+
+                <hr class="my-4">
 
                 <div class="row text-start justify-content-center mt-3">
                     <div class="col-12 col-md-4 mb-3">
@@ -72,10 +108,6 @@
                             readonly placeholder="Menunggu Scan...">
                     </div>
                 </div>
-
-                <button type="button" class="btn btn-outline-danger btn-lg w-100 mt-2 d-none" id="btnRescanTractor" style="border-radius: 12px;">
-                    <i class="bi bi-arrow-repeat me-2"></i>Pindai Ulang Barcode Traktor
-                </button>
 
                 <button type="button" class="btn btn-pink btn-lg w-100 mt-2" id="btnNext1" disabled>
                     Lanjut ke Foto <i class="bi bi-arrow-right-circle ms-2"></i>
@@ -367,8 +399,11 @@
             rememberLastUsedCamera: true
         }, false);
 
-        function onScanSuccess(decodedText) {
-            scanner.clear();
+        function processBarcodeTractor(decodedText) {
+            try {
+                scanner.clear();
+            } catch (e) {}
+
             elNoInstruksi.value = 'Memproses...';
             elTypeTraktor.value = 'Memproses...';
 
@@ -411,6 +446,24 @@
                     document.getElementById('btnNext1').disabled = true;
                 });
         }
+
+        function onScanSuccess(decodedText) {
+            processBarcodeTractor(decodedText);
+        }
+
+        document.getElementById('btnProsesManualScan').addEventListener('click', function() {
+            const val = document.getElementById('manual_scan_input').value.trim();
+            if(val) {
+                processBarcodeTractor(val);
+            }
+        });
+
+        document.getElementById('manual_scan_input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('btnProsesManualScan').click();
+            }
+        });
 
         scanner.render(onScanSuccess, () => {});
 

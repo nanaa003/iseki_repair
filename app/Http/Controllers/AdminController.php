@@ -254,17 +254,14 @@ class AdminController extends Controller
             }
         }
 
-        // ── Download ──────────────────────────────────────────────────────────────
         $filename = 'Report_Perbaikan_' . str_replace(' ', '_', $filterLabel) . '.xlsx';
 
         $writer = new Xlsx($spreadsheet);
 
-        return response()->streamDownload(function () use ($writer) {
-            $writer->save('php://output');
-        }, $filename, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Cache-Control' => 'max-age=0',
-        ]);
+        $temp_file = tempnam(sys_get_temp_dir(), 'excel');
+        $writer->save($temp_file);
+
+        return response()->download($temp_file, $filename)->deleteFileAfterSend(true);
     }
 
     public function duplicates(Request $request)

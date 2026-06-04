@@ -174,14 +174,52 @@ class RepairController extends Controller
 
         $start = Carbon::parse($perbaikan->Jam_Start);
         $finish = Carbon::parse($request->Jam_Finish);
-        $totalMinutes = (int) $start->diffInMinutes($finish);
+        
+        $totalMinutes = 0;
+        $current = $start->copy();
+
+        while ($current < $finish) {
+            // Skip weekends
+            if ($current->isWeekend()) {
+                $current->addDay()->setTime(8, 0, 0);
+                continue;
+            }
+
+            // Adjust start time to 08:00 if before working hours
+            if ($current->format('H:i:s') < '08:00:00') {
+                $current->setTime(8, 0, 0);
+            }
+
+            // If current time is after or at 17:00, move to next day 08:00
+            if ($current->format('H:i:s') >= '17:00:00') {
+                $current->addDay()->setTime(8, 0, 0);
+                continue;
+            }
+            
+            // If the current has been pushed past finish due to adjustments
+            if ($current >= $finish) {
+                break;
+            }
+
+            // Determine the end time for the current day calculation
+            $endOfDay = $current->copy()->setTime(17, 0, 0);
+            
+            // If the finish time is on the same day and before 17:00
+            if ($current->isSameDay($finish) && $finish < $endOfDay) {
+                $totalMinutes += (int) $current->diffInMinutes($finish);
+                break;
+            } else {
+                $totalMinutes += (int) $current->diffInMinutes($endOfDay);
+                $current->addDay()->setTime(8, 0, 0);
+            }
+        }
 
         if ($totalMinutes >= 60) {
             $hours = floor($totalMinutes / 60);
             $minutes = $totalMinutes % 60;
             $totalHoursFormatted = $minutes > 0
-                ? $hours . 'jam ' . $minutes . ' menit'
-                : $hours . 'jam';
+                ? $hours . ' jam ' . $minutes . ' menit'
+                : $hours . ' jam';
         } else {
             $totalHoursFormatted = $totalMinutes . ' menit';
         }

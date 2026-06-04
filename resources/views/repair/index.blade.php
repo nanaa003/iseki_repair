@@ -59,10 +59,8 @@
                 <table class="table table-premium mb-0">
                     <thead>
                         <tr class="text-nowrap">
-                            <th>No Instruksi</th>
-                            <th>Type Traktor</th>
-                            <th>Kategori</th>
-                            <th>Keterangan</th>
+                            <th>Traktor</th>
+                            <th>Permasalahan</th>
                             <th>Jam Mulai</th>
                             <th class="text-center">Foto</th>
                             <th class="text-center">Aksi</th>
@@ -75,16 +73,20 @@
                         $elapsed = $start->diffForHumans(null, true);
                         @endphp
                         <tr>
-                            <td><span class="badge-pink">{{ $p->No_Instruksi ?? $p->Id_Traktor ?? '-' }}</span></td>
-                            <td>{{ $p->Type_Traktor ?? '-' }}</td>
                             <td>
-                                @if($p->Kategori_Perbaikan)
-                                <span class="badge" style="background: var(--pink-100); color: var(--pink-700); border-radius: 8px; font-size: 0.78rem; padding: 0.3rem 0.6rem;">{{ $p->Kategori_Perbaikan }}</span>
-                                @else
-                                <span class="text-muted">-</span>
-                                @endif
+                                <div class="mb-1"><span class="badge-pink">{{ $p->No_Instruksi ?? $p->Id_Traktor ?? '-' }}</span></div>
+                                <div class="small text-muted fw-semibold">{{ $p->Type_Traktor ?? '-' }}</div>
                             </td>
-                            <td class="text-truncate" style="max-width: 280px;">{{ $p->Ket_Perbaikan }}</td>
+                            <td>
+                                <div class="mb-1">
+                                    @if($p->Kategori_Perbaikan)
+                                    <span class="badge" style="background: var(--pink-100); color: var(--pink-700); border-radius: 6px; font-size: 0.75rem; padding: 0.2rem 0.5rem;">{{ $p->Kategori_Perbaikan }}</span>
+                                    @else
+                                    <span class="text-muted small">-</span>
+                                    @endif
+                                </div>
+                                <div class="text-wrap small" style="max-width: 250px;">{{ $p->Ket_Perbaikan }}</div>
+                            </td>
                             <td>
                                 <i class="bi bi-clock text-muted me-1"></i>
                                 {{ \Carbon\Carbon::parse($p->Jam_Start)->format('H:i:s') }}
