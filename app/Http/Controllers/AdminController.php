@@ -13,6 +13,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 
 class AdminController extends Controller
 {
@@ -146,16 +147,20 @@ class AdminController extends Controller
     {
         $query = Perbaikan::query();
 
+        $bulanId = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                         'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
         if ($request->filled('date')) {
-            $query->whereDate('Jam_Start', $request->date);
-            $filterLabel = Carbon::parse($request->date)->format('d M Y');
+            $tgl = Carbon::parse($request->date);
+            $filterLabel = $tgl->day . ' ' . $bulanId[$tgl->month] . ' ' . $tgl->year;
         } elseif ($request->filled('month')) {
             $month = Carbon::parse($request->month . '-01');
             $query->whereMonth('Jam_Start', $month->month)->whereYear('Jam_Start', $month->year);
-            $filterLabel = $month->format('F Y');
+            $filterLabel = $bulanId[$month->month] . ' ' . $month->year;
         } else {
-            $query->whereDate('Jam_Start', Carbon::today());
-            $filterLabel = Carbon::today()->format('d M Y');
+            $tgl = Carbon::today();
+            $query->whereDate('Jam_Start', $tgl);
+            $filterLabel = $tgl->day . ' ' . $bulanId[$tgl->month] . ' ' . $tgl->year;
         }
 
         if ($request->filled('kategori')) {
@@ -215,16 +220,16 @@ class AdminController extends Controller
             $waktuFinish = $p->Jam_Finish ? \Carbon\Carbon::parse($p->Jam_Finish)->format('H:i:s') : '-';
 
             $sheet->setCellValue('A' . $row, $no--);
-            $sheet->setCellValue('B' . $row, $p->No_Instruksi ?? $p->Id_Traktor ?? '-');
-            $sheet->setCellValue('C' . $row, $p->Type_Traktor ?? '-');
-            $sheet->setCellValue('D' . $row, $p->Kategori_Perbaikan ?? '-');
-            $sheet->setCellValue('E' . $row, $p->Nama_PIC ?? '-');
-            $sheet->setCellValue('F' . $row, $p->Ket_Perbaikan ?? '-');
-            $sheet->setCellValue('G' . $row, $tglStart);
-            $sheet->setCellValue('H' . $row, $waktuStart);
-            $sheet->setCellValue('I' . $row, $tglFinish);
-            $sheet->setCellValue('J' . $row, $waktuFinish);
-            $sheet->setCellValue('K' . $row, $p->Total_Jam ?? '-');
+            $sheet->setCellValueExplicit('B' . $row, $p->No_Instruksi ?? $p->Id_Traktor ?? '-', DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('C' . $row, $p->Type_Traktor ?? '-', DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('D' . $row, $p->Kategori_Perbaikan ?? '-', DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('E' . $row, $p->Nama_PIC ?? '-', DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('F' . $row, $p->Ket_Perbaikan ?? '-', DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('G' . $row, $tglStart, DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('H' . $row, $waktuStart, DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('I' . $row, $tglFinish, DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('J' . $row, $waktuFinish, DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('K' . $row, $p->Total_Jam ?? '-', DataType::TYPE_STRING);
 
             $sheet->getStyle('A' . $row . ':K' . $row)->applyFromArray([
                 'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
