@@ -216,7 +216,7 @@
                                 {{ \Carbon\Carbon::parse($r->Jam_Finish)->format('H:i:s') }}
                                 <br><small class="text-muted">{{ \Carbon\Carbon::parse($r->Jam_Finish)->format('d M Y') }}</small>
                             </td>
-                            <td><span class="badge-success-soft">{{ $r->Total_Jam }}</span></td>
+                            <td><span class="badge-success-soft">{{ $r->Total_Jam ?? '-' }}</span></td>
                             <td class="text-center">
                                 @if($r->Photo_Path_Perbaikan)
                                 <img src="{{ asset('storage/' . $r->Photo_Path_Perbaikan) }}"

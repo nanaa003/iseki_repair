@@ -214,16 +214,6 @@ class RepairController extends Controller
             }
         }
 
-        if ($totalMinutes >= 60) {
-            $hours = floor($totalMinutes / 60);
-            $minutes = $totalMinutes % 60;
-            $totalHoursFormatted = $minutes > 0
-                ? $hours . ' jam ' . $minutes . ' menit'
-                : $hours . ' jam';
-        } else {
-            $totalHoursFormatted = $totalMinutes . ' menit';
-        }
-
         $member = Member::where('nik', $request->Id_Member)->first();
         $namaPic = $member ? $member->nama : ($request->Nama_PIC ?: '-');
 
@@ -231,7 +221,7 @@ class RepairController extends Controller
             'Id_Member'  => $request->Id_Member,
             'Nama_PIC'   => $namaPic,
             'Jam_Finish' => $request->Jam_Finish,
-            'Total_Jam'  => $totalHoursFormatted,
+            'Total_Jam'  => $totalMinutes ?: null,
         ]);
 
         return response()->json(['success' => true, 'message' => 'Repair finished successfully.']);

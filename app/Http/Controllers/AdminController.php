@@ -194,7 +194,7 @@ class AdminController extends Controller
         ]);
 
         // Header kolom (baris 4)
-        $headers = ['No', 'No Instruksi', 'Type Traktor', 'Kategori', 'Nama PIC', 'Keterangan', 'Tgl Start', 'Jam Start', 'Tgl Finish', 'Jam Finish', 'Total Jam'];
+        $headers = ['No', 'No Instruksi', 'Type Traktor', 'Kategori', 'Nama PIC', 'Keterangan', 'Tgl Start', 'Jam Start', 'Tgl Finish', 'Jam Finish', 'Total Jam (Menit)'];
         $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'];
 
         foreach ($headers as $i => $header) {
@@ -212,6 +212,7 @@ class AdminController extends Controller
         $row = 5;
         $totalRows = $perbaikans->count();
         $no = $totalRows;
+        $grandTotalMenit = 0;
         foreach ($perbaikans as $p) {
             $tglStart = $p->Jam_Start ? \Carbon\Carbon::parse($p->Jam_Start)->format('d-m-Y') : '-';
             $waktuStart = $p->Jam_Start ? \Carbon\Carbon::parse($p->Jam_Start)->format('H:i:s') : '-';
@@ -229,7 +230,9 @@ class AdminController extends Controller
             $sheet->setCellValueExplicit('H' . $row, $waktuStart, DataType::TYPE_STRING);
             $sheet->setCellValueExplicit('I' . $row, $tglFinish, DataType::TYPE_STRING);
             $sheet->setCellValueExplicit('J' . $row, $waktuFinish, DataType::TYPE_STRING);
-            $sheet->setCellValueExplicit('K' . $row, $p->Total_Jam ?? '-', DataType::TYPE_STRING);
+            $menit = $p->Total_Jam ?? '';
+            if ($menit !== '') $grandTotalMenit += (int)$menit;
+            $sheet->setCellValue('K' . $row, $menit !== '' ? (int)$menit : '');
 
             $sheet->getStyle('A' . $row . ':K' . $row)->applyFromArray([
                 'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
@@ -249,6 +252,26 @@ class AdminController extends Controller
 
             $row++;
         }
+
+        // Total baris
+        $sheet->mergeCells('A' . $row . ':J' . $row);
+        $sheet->setCellValue('A' . $row, 'TOTAL');
+        $sheet->getStyle('A' . $row)->applyFromArray([
+            'font' => ['bold' => true, 'size' => 12],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT],
+        ]);
+        $jam = floor($grandTotalMenit / 60);
+        $sisaMenit = $grandTotalMenit % 60;
+        $totalLabel = $jam > 0 ? $jam . ' jam ' . $sisaMenit . ' menit' : $sisaMenit . ' menit';
+        $sheet->setCellValue('K' . $row, $totalLabel);
+        $sheet->getStyle('K' . $row)->applyFromArray([
+            'font' => ['bold' => true, 'size' => 12],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+        ]);
+        $sheet->getStyle('A' . $row . ':J' . $row)->applyFromArray([
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+        ]);
 
         // Auto width kolom
         foreach ($cols as $col) {

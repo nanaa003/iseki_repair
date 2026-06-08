@@ -214,11 +214,7 @@
                             @endif
                         </td>
                         <td>
-                            @if($p->Total_Jam)
-                            <span class="badge-success-soft">{{ $p->Total_Jam }}</span>
-                            @else
-                            <span class="text-muted">-</span>
-                            @endif
+                            <span class="badge-success-soft">{{ $p->Total_Jam ?? '-' }}</span>
                         </td>
                     </tr>
                     @empty
