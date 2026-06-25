@@ -152,6 +152,7 @@ class AdminController extends Controller
 
         if ($request->filled('date')) {
             $tgl = Carbon::parse($request->date);
+            $query->whereDate('Jam_Start', $tgl);
             $filterLabel = $tgl->day . ' ' . $bulanId[$tgl->month] . ' ' . $tgl->year;
         } elseif ($request->filled('month')) {
             $month = Carbon::parse($request->month . '-01');
