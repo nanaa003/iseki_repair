@@ -150,12 +150,18 @@
                 <label class="form-label fw-bold small text-muted text-uppercase mb-1">
                     <i class="bi bi-calendar-event me-1"></i>Filter Tanggal
                 </label>
-                <input type="date" name="date" id="filterDate" class="form-control" value="{{ request('date', now()->format('Y-m-d')) }}" style="border-radius: 10px;">
-            </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-pink">
-                    <i class="bi bi-search me-1"></i>Filter
-                </button>
+                <div class="input-group" style="border-radius: 10px; overflow: hidden;">
+                    <button type="button" id="prevDateBtn" class="btn btn-outline-secondary">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <input type="date" name="date" id="filterDate"
+                        class="form-control text-center"
+                        value="{{ request('date', now()->format('Y-m-d')) }}"
+                        style="border-radius: 0;">
+                    <button type="button" id="nextDateBtn" class="btn btn-outline-secondary">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
             </div>
             @if(request('date') && request('date') != now()->format('Y-m-d'))
             <div class="col-auto">
@@ -375,6 +381,26 @@
         document.getElementById('photoModalSub').textContent = 'Kategori: ' + kategori;
         new bootstrap.Modal(document.getElementById('photoModal')).show();
     }
+
+    // Prev / Next navigation
+    document.addEventListener('DOMContentLoaded', function() {
+        const input = document.getElementById('filterDate');
+        const form = document.getElementById('filterForm');
+
+        function shiftDate(delta) {
+            if (!input.value) return;
+            const parts = input.value.split('-');
+            const d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+            d.setDate(d.getDate() + delta);
+            input.value = d.getFullYear() + '-'
+                + String(d.getMonth() + 1).padStart(2, '0') + '-'
+                + String(d.getDate()).padStart(2, '0');
+            form.submit();
+        }
+
+        document.getElementById('prevDateBtn').addEventListener('click', () => shiftDate(-1));
+        document.getElementById('nextDateBtn').addEventListener('click', () => shiftDate(1));
+    });
 </script>
 @endpush
 @endsection

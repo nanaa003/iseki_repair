@@ -98,15 +98,21 @@
                 <label class="form-label fw-bold small text-muted text-uppercase mb-1" id="filterDateLabel">
                     <i class="bi bi-calendar-date me-1" id="filterDateIcon"></i><span id="filterDateText">Tanggal</span>
                 </label>
-                <div class="d-flex align-items-center gap-2">
+                <div class="input-group" style="border-radius: 10px; overflow: hidden;">
+                    <button type="button" id="prevDateBtn" class="btn btn-outline-secondary">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
                     <input type="{{ request('month') ? 'month' : 'date' }}"
                         name="{{ request('month') ? 'month' : 'date' }}"
                         id="filterDateInput"
-                        class="form-control"
+                        class="form-control text-center"
                         value="{{ request('month') ?? request('date') ?? now()->format('Y-m-d') }}"
-                        style="border-radius: 10px; min-width: 170px;">
+                        style="border-radius: 0; min-width: 170px;">
+                    <button type="button" id="nextDateBtn" class="btn btn-outline-secondary">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
                     <button type="button" id="toggleDateType" class="btn btn-sm btn-pink-outline"
-                        style="white-space: nowrap; border-radius: 10px; padding: 0.4rem 0.75rem;">
+                        style="white-space: nowrap; border-radius: 0; padding: 0.4rem 0.75rem;">
                         {{ request('month') ? 'Date' : 'Month' }}
                     </button>
                 </div>
@@ -280,6 +286,7 @@
         const toggleBtn = document.getElementById('toggleDateType');
         const labelText = document.getElementById('filterDateText');
         const labelIcon = document.getElementById('filterDateIcon');
+        const form = document.getElementById('filterForm');
 
         function updateLabel() {
             if (input.type === 'month') {
@@ -305,6 +312,29 @@
             }
             updateLabel();
         });
+
+        // Prev / Next navigation
+        function shiftDate(delta) {
+            if (!input.value) return;
+            if (input.type === 'date') {
+                const parts = input.value.split('-');
+                const d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+                d.setDate(d.getDate() + delta);
+                input.value = d.getFullYear() + '-'
+                    + String(d.getMonth() + 1).padStart(2, '0') + '-'
+                    + String(d.getDate()).padStart(2, '0');
+            } else if (input.type === 'month') {
+                const parts = input.value.split('-');
+                const d = new Date(+parts[0], +parts[1] - 1, 1);
+                d.setMonth(d.getMonth() + delta);
+                input.value = d.getFullYear() + '-'
+                    + String(d.getMonth() + 1).padStart(2, '0');
+            }
+            form.submit();
+        }
+
+        document.getElementById('prevDateBtn').addEventListener('click', () => shiftDate(-1));
+        document.getElementById('nextDateBtn').addEventListener('click', () => shiftDate(1));
 
         // Initialize label on page load
         updateLabel();
