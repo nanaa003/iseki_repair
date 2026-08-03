@@ -147,8 +147,21 @@ class AdminController extends Controller
     {
         $query = Perbaikan::query();
 
-        $bulanId = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                         'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        $bulanId = [
+            '',
+            'Januari',
+            'Februari',
+            'Maret',
+            'April',
+            'Mei',
+            'Juni',
+            'Juli',
+            'Agustus',
+            'September',
+            'Oktober',
+            'November',
+            'Desember'
+        ];
 
         if ($request->filled('date')) {
             $tgl = Carbon::parse($request->date);
@@ -181,7 +194,7 @@ class AdminController extends Controller
 
         // Judul
         $sheet->mergeCells('A1:K1');
-        $sheet->setCellValue('A1', 'LAPORAN PERBAIKAN PERMASALAHAN');
+        $sheet->setCellValue('A1', 'LAPORAN REPAIR');
         $sheet->getStyle('A1')->applyFromArray([
             'font' => ['bold' => true, 'size' => 18, 'color' => ['rgb' => '000000']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
@@ -194,15 +207,82 @@ class AdminController extends Controller
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
 
-        // Header kolom (baris 4)
+        // ── Rangkuman PIC ─────────────────────────────────────────────────────────
+        $picSummary = [];
+        $grandTotalMenitAll = 0;
+        foreach ($perbaikans as $p) {
+            $picName = trim($p->Nama_PIC ?? '');
+            $menit = (int)($p->Total_Jam ?? 0);
+            
+            if (empty($picName) || $picName === '-') {
+                continue;
+            }
+            
+            if (!isset($picSummary[$picName])) {
+                $picSummary[$picName] = 0;
+            }
+            $picSummary[$picName] += $menit;
+            $grandTotalMenitAll += $menit;
+        }
+
+        $currentRow = 4;
+
+        if (!empty($picSummary)) {
+            $sheet->mergeCells('A' . $currentRow . ':B' . $currentRow);
+            $sheet->setCellValue('A' . $currentRow, 'Rangkuman PIC');
+            $sheet->getStyle('A' . $currentRow)->applyFromArray([
+                'font' => ['bold' => true, 'size' => 12],
+            ]);
+            $currentRow++;
+
+            $sheet->setCellValue('A' . $currentRow, 'Nama PIC');
+            $sheet->setCellValue('B' . $currentRow, 'Total Jam');
+            $sheet->getStyle('A' . $currentRow . ':B' . $currentRow)->applyFromArray([
+                'font' => ['bold' => true, 'color' => ['rgb' => '000000']],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F3F4F6']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+            ]);
+            $currentRow++;
+
+            foreach ($picSummary as $pic => $totalMenit) {
+                $sheet->setCellValue('A' . $currentRow, $pic);
+                $jam = floor($totalMenit / 60);
+                $sisaMenit = $totalMenit % 60;
+                $totalLabel = $jam > 0 ? $jam . ' jam ' . $sisaMenit . ' menit' : $sisaMenit . ' menit';
+                $sheet->setCellValue('B' . $currentRow, $totalLabel);
+                $sheet->getStyle('A' . $currentRow . ':B' . $currentRow)->applyFromArray([
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                ]);
+                $sheet->getStyle('B' . $currentRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $currentRow++;
+            }
+
+            // Total All PIC
+            $sheet->setCellValue('A' . $currentRow, 'Total All PIC');
+            $jamAll = floor($grandTotalMenitAll / 60);
+            $sisaMenitAll = $grandTotalMenitAll % 60;
+            $totalAllLabel = $jamAll > 0 ? $jamAll . ' jam ' . $sisaMenitAll . ' menit' : $sisaMenitAll . ' menit';
+            $sheet->setCellValue('B' . $currentRow, $totalAllLabel);
+            $sheet->getStyle('A' . $currentRow . ':B' . $currentRow)->applyFromArray([
+                'font' => ['bold' => true],
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+            ]);
+            $sheet->getStyle('B' . $currentRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            
+            $currentRow += 2; // Jarak sebelum tabel utama
+        }
+
+        // Header kolom tabel utama
+        $headerRow = $currentRow;
         $headers = ['No', 'No Instruksi', 'Type Traktor', 'Kategori', 'Nama PIC', 'Keterangan', 'Tgl Start', 'Jam Start', 'Tgl Finish', 'Jam Finish', 'Total Jam (Menit)'];
         $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'];
 
         foreach ($headers as $i => $header) {
-            $sheet->setCellValue($cols[$i] . '4', $header);
+            $sheet->setCellValue($cols[$i] . $headerRow, $header);
         }
 
-        $sheet->getStyle('A4:K4')->applyFromArray([
+        $sheet->getStyle('A' . $headerRow . ':K' . $headerRow)->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => '000000']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F3F4F6']], // light gray
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
@@ -210,7 +290,7 @@ class AdminController extends Controller
         ]);
 
         // Data
-        $row = 5;
+        $row = $headerRow + 1;
         $totalRows = $perbaikans->count();
         $no = $totalRows;
         $grandTotalMenit = 0;

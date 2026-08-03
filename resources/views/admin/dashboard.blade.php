@@ -137,9 +137,15 @@
                 <a href="{{ route('admin.dashboard') }}" class="btn btn-pink-outline me-1">
                     <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
                 </a>
+                @if(request('month'))
                 <a href="{{ route('admin.dashboard.export', request()->query()) }}" class="btn btn-success">
-                    <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
+                    <i class="bi bi-file-earmark-excel me-1"></i>Export Bulanan
                 </a>
+                @else
+                <a href="{{ route('admin.dashboard.export', request()->query()) }}" class="btn btn-success">
+                    <i class="bi bi-file-earmark-excel me-1"></i>Export Harian
+                </a>
+                @endif
             </div>
         </form>
     </div>
