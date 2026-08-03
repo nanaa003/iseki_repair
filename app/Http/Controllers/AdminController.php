@@ -236,7 +236,7 @@ class AdminController extends Controller
             $currentRow++;
 
             $sheet->setCellValue('A' . $currentRow, 'Nama PIC');
-            $sheet->setCellValue('B' . $currentRow, 'Total Jam');
+            $sheet->setCellValue('B' . $currentRow, 'Total Jam (Menit)');
             $sheet->getStyle('A' . $currentRow . ':B' . $currentRow)->applyFromArray([
                 'font' => ['bold' => true, 'color' => ['rgb' => '000000']],
                 'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F3F4F6']],
@@ -247,10 +247,7 @@ class AdminController extends Controller
 
             foreach ($picSummary as $pic => $totalMenit) {
                 $sheet->setCellValue('A' . $currentRow, $pic);
-                $jam = floor($totalMenit / 60);
-                $sisaMenit = $totalMenit % 60;
-                $totalLabel = $jam > 0 ? $jam . ' jam ' . $sisaMenit . ' menit' : $sisaMenit . ' menit';
-                $sheet->setCellValue('B' . $currentRow, $totalLabel);
+                $sheet->setCellValue('B' . $currentRow, $totalMenit);
                 $sheet->getStyle('A' . $currentRow . ':B' . $currentRow)->applyFromArray([
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                 ]);
@@ -260,10 +257,7 @@ class AdminController extends Controller
 
             // Total All PIC
             $sheet->setCellValue('A' . $currentRow, 'Total All PIC');
-            $jamAll = floor($grandTotalMenitAll / 60);
-            $sisaMenitAll = $grandTotalMenitAll % 60;
-            $totalAllLabel = $jamAll > 0 ? $jamAll . ' jam ' . $sisaMenitAll . ' menit' : $sisaMenitAll . ' menit';
-            $sheet->setCellValue('B' . $currentRow, $totalAllLabel);
+            $sheet->setCellValue('B' . $currentRow, $grandTotalMenitAll);
             $sheet->getStyle('A' . $currentRow . ':B' . $currentRow)->applyFromArray([
                 'font' => ['bold' => true],
                 'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
@@ -341,9 +335,7 @@ class AdminController extends Controller
             'font' => ['bold' => true, 'size' => 12],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT],
         ]);
-        $jam = floor($grandTotalMenit / 60);
-        $sisaMenit = $grandTotalMenit % 60;
-        $totalLabel = $jam > 0 ? $jam . ' jam ' . $sisaMenit . ' menit' : $sisaMenit . ' menit';
+        $totalLabel = $grandTotalMenit;
         $sheet->setCellValue('K' . $row, $totalLabel);
         $sheet->getStyle('K' . $row)->applyFromArray([
             'font' => ['bold' => true, 'size' => 12],
