@@ -23,6 +23,7 @@ Route::post('/login', [AdminController::class, 'login']);
 Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
 
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WorkScheduleController;
 
 // Admin Dashboard (Protected)
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
@@ -37,4 +38,9 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+
+    // Work Schedules (Pengaturan Jam Kerja)
+    Route::get('/work-schedules', [WorkScheduleController::class, 'index'])->name('work-schedules.index');
+    Route::post('/work-schedules', [WorkScheduleController::class, 'store'])->name('work-schedules.store');
+    Route::delete('/work-schedules/{id}', [WorkScheduleController::class, 'destroy'])->name('work-schedules.destroy');
 });
