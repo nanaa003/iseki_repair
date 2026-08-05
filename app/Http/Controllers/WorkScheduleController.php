@@ -127,6 +127,8 @@ class WorkScheduleController extends Controller
             ]
         );
 
+        $this->recalculatePerbaikanForDate($request->tanggal);
+
         return response()->json([
             'success' => true,
             'message' => 'Jam kerja untuk ' . Carbon::parse($request->tanggal)->format('d M Y') . ' berhasil disimpan.',
@@ -141,11 +143,37 @@ class WorkScheduleController extends Controller
     {
         $schedule = WorkSchedule::findOrFail($id);
         $tanggal = Carbon::parse($schedule->tanggal)->format('d M Y');
+        $rawTanggal = $schedule->tanggal;
         $schedule->delete();
+
+        $this->recalculatePerbaikanForDate($rawTanggal);
 
         return response()->json([
             'success' => true,
             'message' => 'Pengaturan jam untuk ' . $tanggal . ' dihapus. Kembali ke default.',
         ]);
+    }
+
+    /**
+     * Menghitung ulang Total_Jam untuk perbaikan yang beririsan dengan tanggal ini.
+     */
+    private function recalculatePerbaikanForDate($date)
+    {
+        // Format tanggal
+        $startOfDay = Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s');
+        $endOfDay = Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s');
+
+        // Cari semua perbaikan yang:
+        // 1. Sudah selesai (punya Jam_Finish)
+        // 2. Waktu prosesnya (Start s/d Finish) melewati tanggal ini
+        $affectedPerbaikans = \App\Models\Perbaikan::whereNotNull('Jam_Finish')
+            ->where('Jam_Start', '<=', $endOfDay)
+            ->where('Jam_Finish', '>=', $startOfDay)
+            ->get();
+
+        foreach ($affectedPerbaikans as $perbaikan) {
+            $newTotal = \App\Models\Perbaikan::calculateTotalJam($perbaikan->Jam_Start, $perbaikan->Jam_Finish);
+            $perbaikan->update(['Total_Jam' => $newTotal]);
+        }
     }
 }
