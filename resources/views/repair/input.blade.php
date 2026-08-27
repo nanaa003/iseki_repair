@@ -836,7 +836,6 @@
                 })
                 .then(res => {
                     if (res.success) {
-                        alert('Perbaikan Berhasil Disimpan!');
                         window.location.href = "{{ route('repair.index') }}";
                     } else {
                         alert(res.message || 'Error saving data');

@@ -187,6 +187,7 @@
                         Nama_Member.value = data.nama;
                         Id_Member.value = data.nik;
                         document.getElementById('btnSubmit').disabled = false;
+                        document.getElementById('btnSubmit').click();
                     } else {
                         Nama_Member.value = "NIK TIDAK ADA (" + decodedText + ")";
                         Nama_Member.className = "form-control form-control-lg text-center fw-bold text-danger mb-2 border-danger";
@@ -268,7 +269,6 @@
                 })
                 .then(res => {
                     if (res.success) {
-                        alert("Perbaikan Berhasil Diselesaikan!");
                         window.location.href = "{{ route('repair.index') }}";
                     } else {
                         alert(res.message || "Error saving data");

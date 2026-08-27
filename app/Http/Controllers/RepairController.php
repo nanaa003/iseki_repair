@@ -156,6 +156,8 @@ class RepairController extends Controller
             'Photo_Path_Perbaikan' => $photoPath,
         ]);
 
+        session()->flash('success', "Permasalahan baru berhasil disimpan! Traktor: {$request->Type_Traktor}");
+
         return response()->json(['success' => true, 'message' => 'Data saved successfully.']);
     }
 
@@ -185,6 +187,8 @@ class RepairController extends Controller
             'Jam_Finish' => $request->Jam_Finish,
             'Total_Jam'  => $totalMinutes,
         ]);
+
+        session()->flash('success', "Perbaikan selesai! Kategori: {$perbaikan->Kategori_Perbaikan} | Ket: {$perbaikan->Ket_Perbaikan}");
 
         return response()->json(['success' => true, 'message' => 'Repair finished successfully.']);
     }
